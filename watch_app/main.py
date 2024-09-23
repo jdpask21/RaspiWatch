@@ -1,5 +1,5 @@
 import flet as ft
-from src import get_now_time
+from src import get_now_time, get_weather
 from src import get_temperature_humidity
 import board
 import adafruit_dht as acd
