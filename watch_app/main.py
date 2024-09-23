@@ -5,6 +5,8 @@ import board
 import adafruit_dht as acd
 import time
 
+SIX_HOUR = 60 * 60 * 6
+
 celsius = ft.Text("℃", size=100, color=ft.colors.LIGHT_BLUE_50)
 persent = ft.Text("%", size=100, color=ft.colors.LIGHT_BLUE_50)
 wb_sunny = ft.Icon(name=ft.icons.WB_SUNNY, color=ft.colors.WHITE, size=700)
@@ -17,8 +19,8 @@ wb_unknown = ft.Icon(name=ft.icons.LOCATION_DISABLED_ROUNDED, color=ft.colors.WH
 def main(page: ft.Page):
     dhtDevice = acd.DHT22(board.D18, use_pulseio=False)
     def get_str_time():
-        now_hour, now_minute, month_day, weekday = get_now_time.get_now_time()
-        return "{}:{:02}".format(now_hour, now_minute), month_day, weekday
+        now_hour, now_minute, month_day, weekday, dt = get_now_time.get_now_time()
+        return "{}:{:02}".format(now_hour, now_minute), month_day, weekday, dt
     
     def get_weather_icon():
         wb_code = get_weather.get_osaka_weather()
@@ -42,7 +44,7 @@ def main(page: ft.Page):
 
     page.theme = ft.Theme(font_family="NnumGothic")
 
-    now_time, month_day, weekday = get_str_time()
+    now_time, month_day, weekday, dt = get_str_time()
     temp = 0
     humidity = 0
     
@@ -60,7 +62,7 @@ def main(page: ft.Page):
                 width=1000,
                 height=500,
             )
-    old_month = display_month
+    old_time = dt
 
     page.bgcolor = ft.colors.BLACK
     page.vertical_alignment = ft.MainAxisAlignment.START
@@ -166,15 +168,15 @@ def main(page: ft.Page):
         except Exception:
             dhtDevice = acd.DHT22(board.D18, use_pulseio=False)
         
-        display_time.value, display_month.value, display_weekday.value = get_str_time()
+        display_time.value, display_month.value, display_weekday.value, dt = get_str_time()
 
-        # 天気の更新頻度は一日に一回
-        if display_month != old_month:
+        # 天気の更新頻度は6時間に1回
+        if (dt - old_time).seconds >= SIX_HOUR:
             try:
                 weather.content = get_weather_icon()
             except Exception:
                 weather.content = wb_unknown
-            old_month = display_month 
+            old_time = dt
         else:
             pass
         page.update()
