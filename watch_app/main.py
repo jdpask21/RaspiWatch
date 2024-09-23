@@ -5,12 +5,35 @@ import board
 import adafruit_dht as acd
 import time
 
+celsius = ft.Text("℃", size=100, color=ft.colors.LIGHT_BLUE_50)
+persent = ft.Text("%", size=100, color=ft.colors.LIGHT_BLUE_50)
+wb_sunny = ft.Icon(name=ft.icons.WB_SUNNY, color=ft.colors.WHITE, size=700)
+wb_cloudy = ft.Icon(name=ft.icons.WB_CLOUDY, color=ft.colors.WHITE, size=700)
+wb_rainy = ft.Icon(name=ft.icons.WATER_DROP, color=ft.colors.WHITE, size=700)
+wb_sunny_and_cloudy = ft.Icon(name=ft.icons.WB_TWIGHLIGHT, color=ft.colors.WHITE, size=700)
+wb_cloudy_and_rainy = ft.Icon(name=ft.icons.WATER, color=ft.colors.WHITE, size=700)
+wb_unknown = ft.Icon(name=ft.icons.LOCATION_DISABLED_ROUNDED, color=ft.colors.WHITE, size=700)
 
 def main(page: ft.Page):
     dhtDevice = acd.DHT22(board.D18, use_pulseio=False)
     def get_str_time():
         now_hour, now_minute, month_day, weekday = get_now_time.get_now_time()
         return "{}:{:02}".format(now_hour, now_minute), month_day, weekday
+    
+    def get_weather_icon():
+        wb_code = get_weather.get_osaka_weather()
+        if wb_code == 1:
+            return wb_sunny
+        elif wb_code == 2:
+            return wb_cloudy
+        elif wb_code == 3:
+            return wb_rainy
+        elif wb_code == 4:
+            return wb_sunny_and_cloudy
+        elif wb_code == 5:
+            return wb_cloudy_and_rainy
+        elif wb_code == 6:
+            return wb_unknown
 
     page.title = "Custom fonts"
     page.fonts = {
@@ -28,8 +51,16 @@ def main(page: ft.Page):
     display_weekday = ft.Text(str(weekday), size=150, color=ft.colors.BLUE_600)
     display_temp = ft.Text(str(temp), size=150, color=ft.colors.LIGHT_BLUE_50)
     display_humidity = ft.Text(str(humidity), size=150, color=ft.colors.LIGHT_BLUE_50)
-    celsius = ft.Text("℃", size=100, color=ft.colors.LIGHT_BLUE_50)
-    persent = ft.Text("%", size=100, color=ft.colors.LIGHT_BLUE_50)
+    weather = ft.Container(
+                content=get_weather_icon(),
+                margin=0,
+                padding=0,
+                alignment=ft.Alignment(-0.8, 0.2),
+                bgcolor=ft.colors.TRANSPARENT,
+                width=1000,
+                height=500,
+            )
+    old_month = display_month
 
     page.bgcolor = ft.colors.BLACK
     page.vertical_alignment = ft.MainAxisAlignment.START
@@ -41,14 +72,23 @@ def main(page: ft.Page):
     page.add(
         ft.Column(
             controls = [
-                ft.Container(
-                    content=display_time,
-                    margin=0,
-                    padding=0,
-                    alignment=ft.Alignment(0, -1),
-                    bgcolor=ft.colors.BLACK,
-                    width=2000,
-                    height=700,
+                ft.Stack(
+                    [
+                        ft.Row(
+                            controls = [
+                                weather,
+                                ],
+                        ),
+                        ft.Container(
+                            content=display_time,
+                            margin=0,
+                            padding=0,
+                            alignment=ft.Alignment(0, -1),
+                            bgcolor=ft.colors.TRANSPARENT,
+                            width=2000,
+                            height=700,
+                        ),
+                    ]
                 ),
                 ft.Row(
                     controls = [
@@ -127,6 +167,16 @@ def main(page: ft.Page):
             dhtDevice = acd.DHT22(board.D18, use_pulseio=False)
         
         display_time.value, display_month.value, display_weekday.value = get_str_time()
+
+        # 天気の更新頻度は一日に一回
+        if display_month != old_month:
+            try:
+                weather.content = get_weather_icon()
+            except Exception:
+                weather.content = wb_unknown
+            old_month = display_month 
+        else:
+            pass
         page.update()
         time.sleep(2.0)
         
