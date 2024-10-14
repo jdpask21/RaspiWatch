@@ -49,7 +49,7 @@ def main(page: ft.Page):
     humidity = 0
     
     display_time = ft.Text(str(now_time), size=600, color=ft.colors.BLUE_300)
-    display_month = ft.Text(str(month_day), size=150, color=ft.colors.WHITE)
+    display_month = ft.Text(str(month_day), size=140, color=ft.colors.WHITE)
     display_weekday = ft.Text(str(weekday), size=150, color=ft.colors.BLUE_600)
     display_temp = ft.Text(str(temp), size=150, color=ft.colors.LIGHT_BLUE_50)
     display_humidity = ft.Text(str(humidity), size=150, color=ft.colors.LIGHT_BLUE_50)
