@@ -1,11 +1,14 @@
 import flet as ft
 from src import get_now_time, get_weather
 from src import get_temperature_humidity
+from src import get_human_exist
+from src import switch_bot
 import board
 import adafruit_dht as acd
 import time
 
 SIX_HOUR = 60 * 60 * 6
+THIRTY_MINUTES = 60 * 30
 
 celsius = ft.Text("℃", size=100, color=ft.colors.LIGHT_BLUE_50)
 persent = ft.Text("%", size=100, color=ft.colors.LIGHT_BLUE_50)
@@ -18,6 +21,12 @@ wb_unknown = ft.Icon(name=ft.icons.LOCATION_DISABLED_ROUNDED, color=ft.colors.WH
 
 def main(page: ft.Page):
     dhtDevice = acd.DHT22(board.D18, use_pulseio=False)
+    pir_sensor = get_human_exist.AM312Sensor()
+    light_status = "ON"
+    start_count = False
+    passed_seconds = 0
+    ref_time = 0
+
     def get_str_time():
         now_hour, now_minute, month_day, weekday, dt = get_now_time.get_now_time()
         return "{}:{:02}".format(now_hour, now_minute), month_day, weekday, dt
@@ -36,6 +45,15 @@ def main(page: ft.Page):
             return wb_cloudy_and_rainy
         elif wb_code == 6:
             return wb_unknown
+    
+    def turn_on_light():
+        controller = switch_bot.SwitchBotController(token, secret, device_id)
+        light_on_result = controller.turn_on_light()
+    
+    def initialize_countdown():
+        ref_time = 0
+        start_count = False
+        passed_seconds = 0
 
     page.title = "Custom fonts"
     page.fonts = {
@@ -177,6 +195,35 @@ def main(page: ft.Page):
             except Exception:
                 weather.content = wb_unknown
             old_time = dt
+        else:
+            pass
+        
+        ##
+        # @brief Light control module with AM312 PIR sensor
+        # @details This module controls light based on human presence detection:
+        #          - When light_status is ON:
+        #            Turn off the light if no human is detected for 30 minutes or more
+        #          - When light_status is OFF:
+        #            Turn on the light when human is detected
+        ##
+        pir_result = pir_sensor.detect()
+        # turn off the light
+        if not pir_result and light_status == "ON" and not start_count:
+            start_count = True
+            ref_time = time.time()
+            passed_seconds = 0
+        elif not pir_result and light_status == "ON" and start_count:
+            passed_seconds += time.time() - ref_time
+            if passed_seconds >= THIRTY_MINUTES:
+                turn_on_light()
+                light_status = "OFF"
+                initialize_countdown()
+        elif pir_result and light_status == "ON":
+            if start_count:
+                initialize_countdown()
+        elif pir_result and light_status == "OFF":
+            turn_on_light()
+            light_status = "ON"
         else:
             pass
         page.update()
