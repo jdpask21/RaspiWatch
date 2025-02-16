@@ -74,11 +74,6 @@ def main(page: ft.Page):
         controller = switch_bot.SwitchBotController(SWITCHBOT_API_TOKEN, SWITCHBOT_API_SECRET, SWITCHBOT_DEVICE_ID)
         light_on_result = controller.turn_on_light()
     
-    def initialize_countdown():
-        ref_time = 0
-        start_count = False
-        passed_seconds = 0
-
     page.title = "Custom fonts"
     page.fonts = {
         "NnumGothic": "fonts/NanumGothic-ExtraBold.ttf",
@@ -240,10 +235,14 @@ def main(page: ft.Page):
             if passed_seconds >= LIGHT_OFF_MINUTES:
                 turn_on_light()
                 light_status = "OFF"
-                initialize_countdown()
+                start_count = False
+                ref_time = 0
+                passed_seconds = 0
         elif pir_result and light_status == "ON":
             if start_count:
-                initialize_countdown()
+                start_count = False
+                ref_time = 0
+                passed_seconds = 0
         elif pir_result and light_status == "OFF":
             turn_on_light()
             light_status = "ON"
