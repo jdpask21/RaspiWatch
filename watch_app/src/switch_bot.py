@@ -6,9 +6,6 @@ import hmac
 from datetime import datetime, timezone
 from typing import Dict, Any
 
-SWITCHBOT_API_TOKEN = ''   #your api token
-SWITCHBOT_API_SECRET = ''   # your secret api token
-SWITCHBOT_DEVICE_ID = ''   # your device ID
 #TODO: add feature to operate N-device in this application
 
 class SwitchBotController:
@@ -58,7 +55,7 @@ class SwitchBotController:
             headers = self._generate_headers()
             devices = "/devices/"
             commands = "/commands"
-            full_url = f"{self.base_url}{devices}{SWITCHBOT_DEVICE_ID}{commands}"
+            full_url = f"{self.base_url}{devices}{self.device_id}{commands}"
 
             if method == "GET":
                 response = requests.get(full_url, headers=headers)
@@ -93,28 +90,28 @@ class SwitchBotController:
         response = self._make_api_request(method="POST", payload=payload)
         return response.get("statusCode") == 100
 
-def main():
-    """
-    メイン関数: SwitchBotライトの操作デモ
-    環境変数からAPIトークン、シークレット、デバイスIDを取得
-    """
-    # 環境変数からAPIトークン、シークレット、デバイスIDを取得
-    token = SWITCHBOT_API_TOKEN
-    secret = SWITCHBOT_API_SECRET
-    device_id = SWITCHBOT_DEVICE_ID
+# def main():
+#     """
+#     メイン関数: SwitchBotライトの操作デモ
+#     環境変数からAPIトークン、シークレット、デバイスIDを取得
+#     """
+#     # 環境変数からAPIトークン、シークレット、デバイスIDを取得
+#     token = SWITCHBOT_API_TOKEN
+#     secret = SWITCHBOT_API_SECRET
+#     device_id = SWITCHBOT_DEVICE_ID
 
-    if not token or not secret or not device_id:
-        print("環境変数 SWITCHBOT_API_TOKEN、SWITCHBOT_API_SECRET、または SWITCHBOT_DEVICE_ID が設定されていません。")
-        return
+#     if not token or not secret or not device_id:
+#         print("環境変数 SWITCHBOT_API_TOKEN、SWITCHBOT_API_SECRET、または SWITCHBOT_DEVICE_ID が設定されていません。")
+#         return
 
-    # SwitchBotコントローラーの初期化
-    controller = SwitchBotController(token, secret, device_id)
+#     # SwitchBotコントローラーの初期化
+#     controller = SwitchBotController(token, secret, device_id)
 
-    # ライトをONにする
-    if controller.turn_on_light():
-        print("ライトをONにしました。")
-    else:
-        print("ライトのON操作に失敗しました。")
+#     # ライトをONにする
+#     if controller.turn_on_light():
+#         print("ライトをONにしました。")
+#     else:
+#         print("ライトのON操作に失敗しました。")
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

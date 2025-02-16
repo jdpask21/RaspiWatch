@@ -1,4 +1,6 @@
 import flet as ft
+from dotenv import load_dotenv
+import os
 from src import get_now_time, get_weather
 from src import get_temperature_humidity
 from src import get_human_exist
@@ -7,8 +9,8 @@ import board
 import adafruit_dht as acd
 import time
 
-SIX_HOUR = 60 * 60 * 6
-THIRTY_MINUTES = 60 * 30
+WEATHER_UPDATE_MINUTES = 60 * 60 * 6
+LIGHT_OFF_MINUTES = 60 * 30
 
 celsius = ft.Text("℃", size=100, color=ft.colors.LIGHT_BLUE_50)
 persent = ft.Text("%", size=100, color=ft.colors.LIGHT_BLUE_50)
@@ -18,6 +20,28 @@ wb_rainy = ft.Icon(name=ft.icons.WATER_DROP, color=ft.colors.WHITE, size=700)
 wb_sunny_and_cloudy = ft.Icon(name=ft.icons.WB_TWIGHLIGHT, color=ft.colors.WHITE, size=700)
 wb_cloudy_and_rainy = ft.Icon(name=ft.icons.WATER, color=ft.colors.WHITE, size=700)
 wb_unknown = ft.Icon(name=ft.icons.LOCATION_DISABLED_ROUNDED, color=ft.colors.WHITE, size=700)
+
+
+def load_switchbot_credentials():
+    """
+    Load SwitchBot credentials from environment variables
+    """
+    # Load environment variables from .env file if it exists
+    load_dotenv()
+
+    # Get environment variables
+    api_token = os.getenv('SWITCHBOT_API_TOKEN')
+    api_secret = os.getenv('SWITCHBOT_API_SECRET')
+    device_id = os.getenv('SWITCHBOT_DEVICE_ID')
+
+    if not all([api_token, api_secret, device_id]):
+        raise EnvironmentError("Missing required environment variables")
+
+    return {
+        'token': api_token,
+        'secret': api_secret,
+        'device_id': device_id
+    }
 
 def main(page: ft.Page):
     dhtDevice = acd.DHT22(board.D18, use_pulseio=False)
@@ -47,7 +71,7 @@ def main(page: ft.Page):
             return wb_unknown
     
     def turn_on_light():
-        controller = switch_bot.SwitchBotController(token, secret, device_id)
+        controller = switch_bot.SwitchBotController(SWITCHBOT_API_TOKEN, SWITCHBOT_API_SECRET, SWITCHBOT_DEVICE_ID)
         light_on_result = controller.turn_on_light()
     
     def initialize_countdown():
@@ -189,7 +213,7 @@ def main(page: ft.Page):
         display_time.value, display_month.value, display_weekday.value, dt = get_str_time()
 
         # 天気の更新頻度は6時間に1回
-        if (dt - old_time).seconds >= SIX_HOUR:
+        if (dt - old_time).seconds >= WEATHER_UPDATE_MINUTES:
             try:
                 weather.content = get_weather_icon()
             except Exception:
@@ -197,7 +221,6 @@ def main(page: ft.Page):
             old_time = dt
         else:
             pass
-        
         ##
         # @brief Light control module with AM312 PIR sensor
         # @details This module controls light based on human presence detection:
@@ -213,8 +236,8 @@ def main(page: ft.Page):
             ref_time = time.time()
             passed_seconds = 0
         elif not pir_result and light_status == "ON" and start_count:
-            passed_seconds += time.time() - ref_time
-            if passed_seconds >= THIRTY_MINUTES:
+            passed_seconds = time.time() - ref_time
+            if passed_seconds >= LIGHT_OFF_MINUTES:
                 turn_on_light()
                 light_status = "OFF"
                 initialize_countdown()
@@ -227,6 +250,10 @@ def main(page: ft.Page):
         else:
             pass
         page.update()
-        time.sleep(2.0)
-        
+        time.sleep(1.0)
+
+credentials = load_switchbot_credentials()
+SWITCHBOT_API_TOKEN = credentials['token']
+SWITCHBOT_API_SECRET = credentials['secret']
+SWITCHBOT_DEVICE_ID = credentials['device_id']
 ft.app(target=main, assets_dir="assets")
