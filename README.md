@@ -31,7 +31,6 @@ A desktop clock application built with Flet that displays time, temperature, hum
    - Connect the sensor's data pin to GPIO18 (Pin D18)
    - Connect VCC to 3.3V or 5V power
    - Connect GND to ground
-   - Connect a 10K resistor between data and VCC pins
 
 2. Connect the AM312 human sensor:
    - Connect VCC to GPIO pin 2 (5V power)
