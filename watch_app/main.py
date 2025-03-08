@@ -21,6 +21,8 @@ wb_rainy = ft.Icon(name=ft.icons.WATER_DROP, color=ft.colors.WHITE, size=700)
 wb_sunny_and_cloudy = ft.Icon(name=ft.icons.WB_TWIGHLIGHT, color=ft.colors.WHITE, size=700)
 wb_cloudy_and_rainy = ft.Icon(name=ft.icons.WATER, color=ft.colors.WHITE, size=700)
 wb_unknown = ft.Icon(name=ft.icons.LOCATION_DISABLED_ROUNDED, color=ft.colors.WHITE, size=700)
+light_icon_ = ft.Icon(name=ft.icons.WB_TWIGHLIGHT, color=ft.colors.WHITE, size=200)
+light_off_icon_ = ft.Icon(name=ft.icons.NIGHTLIGHT, color=ft.colors.WHITE, size=200)
 
 
 def load_switchbot_credentials():
@@ -236,6 +238,10 @@ def main(page: ft.Page):
         light_result = light_sensor.read_brightness()
         if (light_result and light_status == "OFF") or (not light_result and light_status == "ON"):
             light_status, count_light_status_diff = change_light_status_by_Cds(count_light_status_diff, light_status)
+        if light_status == "ON":
+            light_icon.content = light_icon_
+        else:
+            light_icon.content = light_off_icon_
         ##
         # @brief Light control module with AM312 PIR sensor
         # @details This module controls light based on human presence detection:
