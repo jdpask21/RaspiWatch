@@ -1,4 +1,4 @@
 #!/bin/bash
-cd ~/github/RaspiWatch
-source .venv/bin/activate
+cd cd /home/ikeda/github/RaspiWatch
+source /home/ikeda/github/RaspiWatch/.venv/bin/activate
 flet run watch_app
