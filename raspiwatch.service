@@ -1,0 +1,12 @@
+[Unit]
+Description=RaspiWatch Flet App
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ikeda/github/RaspiWatch
+ExecStart=/bin/bash /home/ikeda/github/RaspiWatch/systemd_service/start_watch_app.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
