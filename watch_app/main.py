@@ -10,8 +10,8 @@ import board
 import adafruit_dht as acd
 import time
 
-WEATHER_UPDATE_MINUTES = 60 * 60 * 6
-LIGHT_OFF_MINUTES = 60 * 10
+WEATHER_UPDATE_MINUTES = 60 * 60 * 1
+LIGHT_OFF_MINUTES = 60 * 60
 
 celsius = ft.Text("℃", size=100, color=ft.colors.LIGHT_BLUE_50)
 persent = ft.Text("%", size=100, color=ft.colors.LIGHT_BLUE_50)
@@ -117,6 +117,15 @@ def main(page: ft.Page):
                 width=1000,
                 height=500,
             )
+    light_icon = ft.Container(
+                content=light_icon_,
+                margin=10,
+                padding=0,
+                alignment=ft.Alignment(1.0, -1.0),
+                bgcolor=ft.colors.TRANSPARENT,
+                width=800,
+                height=500,
+            )
     old_time = dt
 
     page.bgcolor = ft.colors.BLACK
@@ -134,6 +143,7 @@ def main(page: ft.Page):
                         ft.Row(
                             controls = [
                                 weather,
+                                light_icon,
                                 ],
                         ),
                         ft.Container(
