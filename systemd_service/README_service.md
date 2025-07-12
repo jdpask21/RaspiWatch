@@ -2,7 +2,7 @@
 
 1. 以下のコマンドで、シェルスクリプトに実行権限を与えてください。
 ```
-chmod +x ~/github/RaspiWatch/start_watch_app.sh
+chmod +x ~/github/RaspiWatch/systemd_service/start_watch_app.sh
 ```
 2. 以下のコマンドを実行し、サービスを有効化し、起動してください。
 ```
