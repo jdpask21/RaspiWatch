@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 import time
-from watch_app.src.ad_converter import MCP3002
+from src.ad_converter import MCP3002
 
 class GL5528Sensor:
     """
