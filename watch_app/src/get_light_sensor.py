@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+from ad_converter import MCP3002
 
 class GL5528Sensor:
     """
@@ -51,7 +52,8 @@ class GL5528Sensor:
         ## @retval 0: Brightness is low (sensor detects OFF light).
         ## @retval 1: Brightness is high (sensor detects ON light).
         """
-            adc = MCP3002(bus=0, device=0)
+
+        adc = MCP3002(bus=0, device=0)
         try:
             # チャンネル0からCdsセンサの値を読み取り
             cds_adc_value = adc.read_channel(0)
