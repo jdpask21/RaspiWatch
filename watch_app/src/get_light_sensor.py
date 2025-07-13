@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+from ad_converter import MCP3002
 
 class GL5528Sensor:
     """
@@ -48,21 +49,22 @@ class GL5528Sensor:
         ## @details
         Checks the digital input from the specified GPIO pin.
         
-        ## @retval 1 Room is bright.
-        ## @retval 0 Room is dark.
+        ## @retval 0: Brightness is low (sensor detects OFF light).
+        ## @retval 1: Brightness is high (sensor detects ON light).
         """
+
+        adc = MCP3002(bus=0, device=0)
         try:
-            # Read digital input from Cds sensor
-            if GPIO.input(self.gpio_pin) == GPIO.HIGH:
-                # print("Room is bright.")
+            # チャンネル0からCdsセンサの値を読み取り
+            cds_adc_value = adc.read_channel(0)
+            if cds_adc_value >= 601:
+                adc.close()
                 return 1
             else:
-                # print("Room is dark.")
+                adc.close()
                 return 0
-        except Exception as e:
-            print(f"Error reading from Cds sensor: {e}")
-            GPIO.cleanup()
-            raise
+        finally:
+            adc.close()
 
     def cleanup(self):
         """
@@ -88,7 +90,7 @@ def main():
     
     try:
         while True:
-            sensor.read_brightness()
+            print(sensor.read_brightness())
             time.sleep(1)  # Check every second
     except KeyboardInterrupt:
         print("Terminating the program...")
