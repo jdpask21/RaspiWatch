@@ -90,7 +90,7 @@ def main():
     
     try:
         while True:
-            sensor.read_brightness()
+            print(sensor.read_brightness())
             time.sleep(1)  # Check every second
     except KeyboardInterrupt:
         print("Terminating the program...")
