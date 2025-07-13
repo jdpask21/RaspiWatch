@@ -34,11 +34,11 @@ class MCP3002:
         command = 0x68 if channel == 0 else 0x78  # 0x68 = ch0, 0x78 = ch1
         
         # Send/receive data via SPI (3 bytes)
-        response = self.spi.xfer2([command, 0x00, 0x00])
+        response = self.spi.xfer2([command, 0x00])
         
         # Extract 10-bit value from received data
         # Combine lower 2 bits of 2nd byte with upper 8 bits of 3rd byte
-        adc_value = ((response[1] & 0x03) << 8) | response[2]
+        adc_value = ((response[0] & 0x03) << 8) | response[1]
         
         return adc_value
     
