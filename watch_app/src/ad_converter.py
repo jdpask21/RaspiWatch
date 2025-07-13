@@ -26,6 +26,22 @@ class MCP3002:
         
         @exception ValueError  If channel is not 0 or 1
         """
+        """
+        MCP3002 SPI Communication Protocol Explanation
+
+        1. Command Format (8 bits):
+           Bit 7: Start bit (always 1)
+           Bit 6: Single/Diff (1=Single-ended, 0=Differential)
+           Bit 5: Channel select (0=CH0, 1=CH1)
+           Bit 4: MSBF (1=MSB first, 0=LSB first)
+           Bit 3-0: Don't care bits (dummy)
+
+        2. Response Format (16 bits total):
+           Byte 0: Bit 7-2: Don't care, Bit 1-0: Upper 2 bits of ADC result
+           Byte 1: Bit 7-0: Lower 8 bits of ADC result
+
+        Example breakdown:
+        """
         if channel not in [0, 1]:
             raise ValueError("Channel must be 0 or 1")
         
@@ -33,7 +49,7 @@ class MCP3002:
         # Start bit (1) + Single/Diff (1) + Channel (1) + MSBF (1) + 4 dummy bits
         command = 0x68 if channel == 0 else 0x78  # 0x68 = ch0, 0x78 = ch1
         
-        # Send/receive data via SPI (3 bytes)
+        # Send/receive data via SPI (2 bytes)
         response = self.spi.xfer2([command, 0x00])
         
         # Extract 10-bit value from received data

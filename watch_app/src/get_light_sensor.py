@@ -48,21 +48,19 @@ class GL5528Sensor:
         ## @details
         Checks the digital input from the specified GPIO pin.
         
-        ## @retval 1 Room is bright.
-        ## @retval 0 Room is dark.
+        ## @retval 0: Brightness is low (sensor detects OFF light).
+        ## @retval 1: Brightness is high (sensor detects ON light).
         """
+            adc = MCP3002(bus=0, device=0)
         try:
-            # Read digital input from Cds sensor
-            if GPIO.input(self.gpio_pin) == GPIO.HIGH:
-                # print("Room is bright.")
+            # チャンネル0からCdsセンサの値を読み取り
+            cds_adc_value = adc.read_channel(0)
+            if cds_adc_value >= 601:
                 return 1
             else:
-                # print("Room is dark.")
                 return 0
-        except Exception as e:
-            print(f"Error reading from Cds sensor: {e}")
-            GPIO.cleanup()
-            raise
+        finally:
+            adc.close()
 
     def cleanup(self):
         """
