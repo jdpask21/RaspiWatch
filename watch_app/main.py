@@ -71,7 +71,7 @@ def main(page: ft.Page):
 
     def get_str_time():
         now_hour, now_minute, month_day, weekday, dt = get_now_time.get_now_time()
-        return "{}:{:02}".format(now_hour, now_minute), month_day, weekday, dt
+        return "{}:{:02}".format(now_hour, now_minute), month_day, weekday, dt, now_hour
     
     def get_weather_icon():
         wb_code = get_weather.get_osaka_weather()
@@ -99,7 +99,7 @@ def main(page: ft.Page):
 
     page.theme = ft.Theme(font_family="NnumGothic")
 
-    now_time, month_day, weekday, dt = get_str_time()
+    now_time, month_day, weekday, dt, _ = get_str_time()
     temp = 0
     humidity = 0
     
@@ -233,7 +233,7 @@ def main(page: ft.Page):
         except Exception:
             dhtDevice = acd.DHT22(board.D18, use_pulseio=False)
         
-        display_time.value, display_month.value, display_weekday.value, dt = get_str_time()
+        display_time.value, display_month.value, display_weekday.value, dt, int_hour = get_str_time()
 
         # 天気の更新頻度は6時間に1回
         if (dt - old_time).seconds >= WEATHER_UPDATE_MINUTES:
@@ -256,7 +256,7 @@ def main(page: ft.Page):
         # @brief Light control module with AM312 PIR sensor
         # @details This module controls light based on human presence detection:
         #          - When light_status is ON:
-        #            Turn off the light if no human is detected for 10 minutes or more
+        #            Turn off the light if no human is detected for 60 minutes or more
         #          - When light_status is OFF:
         #            Turn on the light when human is detected
         ##
@@ -267,7 +267,7 @@ def main(page: ft.Page):
             passed_seconds = 0
         elif not pir_result and light_status == "ON" and start_count:
             passed_seconds = time.time() - ref_time
-            if passed_seconds >= LIGHT_OFF_MINUTES:
+            if passed_seconds >= LIGHT_OFF_MINUTES and int_hour <= 6:
                 turn_on_light()
                 light_status = "OFF"
                 start_count, ref_time, passed_seconds = initialize_each_param()
