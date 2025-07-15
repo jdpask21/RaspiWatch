@@ -57,7 +57,7 @@ class GL5528Sensor:
         try:
             # チャンネル0からCdsセンサの値を読み取り
             cds_adc_value = adc.read_channel(0)
-            if cds_adc_value >= 570:
+            if cds_adc_value >= 520:
                 adc.close()
                 return 1
             else:
