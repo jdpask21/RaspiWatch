@@ -246,8 +246,12 @@ def main(page: ft.Page):
             pass
         
         light_result = light_sensor.read_brightness()
-        if (light_result and light_status == "OFF") or (not light_result and light_status == "ON"):
-            light_status, count_light_status_diff = change_light_status_by_Cds(count_light_status_diff, light_status)
+        if light_result:
+            light_status = "ON"
+        else:
+            light_status = "OFF"
+        # if (light_result and light_status == "OFF") or (not light_result and light_status == "ON"):
+        #     light_status, count_light_status_diff = change_light_status_by_Cds(count_light_status_diff, light_status)
         if light_status == "ON":
             light_icon.content = light_icon_
         else:
