@@ -278,7 +278,7 @@ def main(page: ft.Page):
         elif pir_result and light_status == "ON":
             if start_count:
                 start_count, ref_time, passed_seconds = initialize_each_param()
-        elif pir_result and light_status == "OFF" and int_hour >= 10 and int_hour < 23:
+        elif pir_result and light_status == "OFF" and int_hour >= 7 and int_hour < 23:
             turn_on_light()
             light_status = "ON"
         elif not pir_result and light_status == "OFF":
