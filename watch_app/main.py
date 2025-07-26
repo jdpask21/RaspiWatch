@@ -12,6 +12,7 @@ import time
 
 WEATHER_UPDATE_MINUTES = 60 * 60 * 1
 LIGHT_OFF_MINUTES = 60 * 60
+SECONDS_CHANGE_LIGHT_STATUS = 2
 
 celsius = ft.Text("℃", size=100, color=ft.colors.LIGHT_BLUE_50)
 persent = ft.Text("%", size=100, color=ft.colors.LIGHT_BLUE_50)
@@ -48,7 +49,7 @@ def load_switchbot_credentials():
 
 def change_light_status_by_Cds(count_light_status_diff: int, light_status: str):
     count_light_status_diff += 1
-    if count_light_status_diff == 3:
+    if count_light_status_diff == SECONDS_CHANGE_LIGHT_STATUS:
         count_light_status_diff = 0
         if light_status == "ON":
             return "OFF", count_light_status_diff
@@ -250,8 +251,8 @@ def main(page: ft.Page):
             light_status = "ON"
         else:
             light_status = "OFF"
-        # if (light_result and light_status == "OFF") or (not light_result and light_status == "ON"):
-        #     light_status, count_light_status_diff = change_light_status_by_Cds(count_light_status_diff, light_status)
+        if (light_result and light_status == "OFF") or (not light_result and light_status == "ON"):
+            light_status, count_light_status_diff = change_light_status_by_Cds(count_light_status_diff, light_status)
         if light_status == "ON":
             light_icon.content = light_icon_
         else:
