@@ -12,6 +12,7 @@ import time
 
 WEATHER_UPDATE_MINUTES = 60 * 60 * 1
 LIGHT_OFF_MINUTES = 60 * 60
+SECONDS_CHANGE_LIGHT_STATUS = 2
 
 celsius = ft.Text("℃", size=100, color=ft.colors.LIGHT_BLUE_50)
 persent = ft.Text("%", size=100, color=ft.colors.LIGHT_BLUE_50)
@@ -23,6 +24,7 @@ wb_cloudy_and_rainy = ft.Icon(name=ft.icons.WATER, color=ft.colors.WHITE, size=7
 wb_unknown = ft.Icon(name=ft.icons.LOCATION_DISABLED_ROUNDED, color=ft.colors.WHITE, size=700)
 light_icon_ = ft.Icon(name=ft.icons.WB_TWIGHLIGHT, color=ft.colors.WHITE, size=200)
 light_off_icon_ = ft.Icon(name=ft.icons.NIGHTLIGHT, color=ft.colors.WHITE, size=200)
+switch_icon = ft.Icon(name=ft.icons.FLASHLIGHT_OFF_OUTLINED, color=ft.colors.WHITE, size=200)
 
 
 def load_switchbot_credentials():
@@ -48,7 +50,7 @@ def load_switchbot_credentials():
 
 def change_light_status_by_Cds(count_light_status_diff: int, light_status: str):
     count_light_status_diff += 1
-    if count_light_status_diff == 3:
+    if count_light_status_diff == SECONDS_CHANGE_LIGHT_STATUS:
         count_light_status_diff = 0
         if light_status == "ON":
             return "OFF", count_light_status_diff
@@ -69,9 +71,24 @@ def main(page: ft.Page):
     ref_time = 0
     count_light_status_diff = 0
 
+    # スイッチ入力状態を管理する変数
+    switch_pressed = True
+
+    # switch_icon用のコンテナ
+    switch_icon_container = ft.Container(
+        content=switch_icon,
+        margin=10,
+        padding=0,
+        alignment=ft.Alignment(1.0, -1.0),
+        bgcolor=ft.colors.TRANSPARENT,
+        width=800,
+        height=500,
+        visible=False,  # 初期状態は非表示
+    )
+
     def get_str_time():
         now_hour, now_minute, month_day, weekday, dt = get_now_time.get_now_time()
-        return "{}:{:02}".format(now_hour, now_minute), month_day, weekday, dt
+        return "{}:{:02}".format(now_hour, now_minute), month_day, weekday, dt, now_hour
     
     def get_weather_icon():
         wb_code = get_weather.get_osaka_weather()
@@ -99,7 +116,7 @@ def main(page: ft.Page):
 
     page.theme = ft.Theme(font_family="NnumGothic")
 
-    now_time, month_day, weekday, dt = get_str_time()
+    now_time, month_day, weekday, dt, _ = get_str_time()
     temp = 0
     humidity = 0
     
@@ -144,7 +161,8 @@ def main(page: ft.Page):
                             controls = [
                                 weather,
                                 light_icon,
-                                ],
+                                switch_icon_container, 
+                            ],
                         ),
                         ft.Container(
                             content=display_time,
@@ -233,7 +251,7 @@ def main(page: ft.Page):
         except Exception:
             dhtDevice = acd.DHT22(board.D18, use_pulseio=False)
         
-        display_time.value, display_month.value, display_weekday.value, dt = get_str_time()
+        display_time.value, display_month.value, display_weekday.value, dt, int_hour = get_str_time()
 
         # 天気の更新頻度は6時間に1回
         if (dt - old_time).seconds >= WEATHER_UPDATE_MINUTES:
@@ -246,6 +264,10 @@ def main(page: ft.Page):
             pass
         
         light_result = light_sensor.read_brightness()
+        if light_result:
+            light_status = "ON"
+        else:
+            light_status = "OFF"
         if (light_result and light_status == "OFF") or (not light_result and light_status == "ON"):
             light_status, count_light_status_diff = change_light_status_by_Cds(count_light_status_diff, light_status)
         if light_status == "ON":
@@ -256,7 +278,7 @@ def main(page: ft.Page):
         # @brief Light control module with AM312 PIR sensor
         # @details This module controls light based on human presence detection:
         #          - When light_status is ON:
-        #            Turn off the light if no human is detected for 10 minutes or more
+        #            Turn off the light if no human is detected for 60 minutes or more
         #          - When light_status is OFF:
         #            Turn on the light when human is detected
         ##
@@ -274,13 +296,26 @@ def main(page: ft.Page):
         elif pir_result and light_status == "ON":
             if start_count:
                 start_count, ref_time, passed_seconds = initialize_each_param()
-        elif pir_result and light_status == "OFF":
+        elif pir_result and light_status == "OFF" and int_hour >= 7 and int_hour < 23:
             turn_on_light()
             light_status = "ON"
         elif not pir_result and light_status == "OFF":
             start_count, ref_time, passed_seconds = initialize_each_param()
         else:
             pass
+
+        # スイッチ入力の検知（例: GPIOやセンサーからの入力）
+        # ここは実際のスイッチ検知ロジックに置き換えてください
+        # 例: switch_pressed = check_switch_input()
+        # 仮の例: 1秒ごとにトグル
+        # switch_pressed = not switch_pressed
+
+        # switch_iconの表示制御
+        if switch_pressed:
+            switch_icon_container.visible = True
+        else:
+            switch_icon_container.visible = False
+
         page.update()
         time.sleep(1.0)
 
