@@ -161,7 +161,7 @@ def main(page: ft.Page):
                             controls = [
                                 weather,
                                 light_icon,
-                                switch_icon_container,  # ここに追加
+                                switch_icon_container, 
                             ],
                         ),
                         ft.Container(
